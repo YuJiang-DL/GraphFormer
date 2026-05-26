@@ -171,19 +171,4 @@ class MLP_attention(torch.nn.Module):
         postprocessed_output = self.postprocess(x_concat, batch)
         risk = self.risk_prediction_layer(postprocessed_output)
 
-        # i = 0
-        # for i in range(int(self.layer_num)-1):
-        #     i = i
-        #     x_temp_out, x_temp_out_attention = self.conv_list[i](x_out, preprocess_edge_attr, data.adj_t, batch)
-        #     x_concat = torch.cat((x_concat, x_temp_out_attention), 1)
-        #     if self.residual == "Y":
-        #         x_out = x_temp_out + x_out
-        #     else:
-        #         x_out = x_temp_out
-        #     final_x = x_out
-        # x_temp_out, x_temp_out_attention = self.conv_list[i+1](x_out, preprocess_edge_attr, data.adj_t, batch)
-        # x_concat = torch.cat((x_concat, x_temp_out_attention), 1)
-        # postprocessed_output = self.postprocess(x_concat, batch)
-        # risk = self.risk_prediction_layer(postprocessed_output)
-
         return risk

@@ -4,46 +4,40 @@ import os
 import xml.etree.ElementTree as ET
 import pandas as pd
 import numpy as np
-
-OPENSLIDE_PATH = r" "
-if hasattr(os, 'add_dll_directory'):
-    with os.add_dll_directory(OPENSLIDE_PATH):
-        import openslide
-else:
-    import openslide
+import openslide
 
 # =========================
 # 1. 配置区
 # =========================
-WSI_ROOTDIR = r"D:\DGWSI\svs"
-IG_ROOTDIR = r"D:\PycharmProjects\zhongshan_hospital\Graph_neural_network\IG_analysis\heatmap\筛选\IG"
-CSV_ROOTDIR = r"D:\PycharmProjects\zhongshan_hospital\Graph_neural_network\IG_analysis\heatmap\筛选\local"
+WSI_ROOTDIR = " "
+IG_ROOTDIR = " "
+CSV_ROOTDIR = " "
 
 CASES = [
     {
-        "case_id": "168344",
-        "ig_npy": r"G:\江宇个人\Projects\dg\Graph_neural_network\IG_analysis\heatmap\筛选\IG\168344.npy",
-        "wsi_path": r"G:\svs\168344.svs",
-        "superpatch_csv": r"G:\江宇个人\Projects\dg\Graph_neural_network\IG_analysis\heatmap\筛选\local\168344_0.75_4.3_artifact_sophis_final.csv",
-        "location_csv": r"G:\江宇个人\Projects\dg\Graph_neural_network\IG_analysis\heatmap\筛选\local\168344_node_location_list.csv",
+        "case_id": "123",
+        "ig_npy": " ",
+        "wsi_path": " ",
+        "superpatch_csv": "123_0.75_4.3_artifact_sophis_final.csv",
+        "location_csv": "123_node_location_list.csv",
     },
     {
-        "case_id": "160477",
-        "ig_npy": r"G:\江宇个人\Projects\dg\Graph_neural_network\IG_analysis_kongzhuan\160477_0.75\160477.npy",
-        "wsi_path": r"G:\svs\160477.svs",
-        "superpatch_csv": r"G:\江宇个人\Projects\dg\Graph_neural_network\IG_analysis_kongzhuan\graph\160477_0.75_4.3_artifact_sophis_final.csv",
-        "location_csv": r"G:\江宇个人\Projects\dg\Graph_neural_network\IG_analysis\heatmap\筛选\local\160477_node_location_list.csv",
+        "case_id": "123",
+        "ig_npy": " ",
+        "wsi_path": " ",
+        "superpatch_csv": "123_0.75_4.3_artifact_sophis_final.csv",
+        "location_csv": "123_node_location_list.csv",
     },
     {
-        "case_id": "167999",
-        "ig_npy": r"G:\江宇个人\Projects\dg\Graph_neural_network\IG_analysis_kongzhuan\167999_0.75\167999.npy",
-        "wsi_path": r"G:\svs\167999.svs",
-        "superpatch_csv": r"G:\江宇个人\Projects\dg\Graph_neural_network\IG_analysis\heatmap\筛选\local\167999_0.75_4.3_artifact_sophis_final.csv",
-        "location_csv": r"G:\江宇个人\Projects\dg\Graph_neural_network\IG_analysis\heatmap\筛选\local\167999_node_location_list.csv",
+        "case_id": "123",
+        "ig_npy": " ",
+        "wsi_path": " ",
+        "superpatch_csv": "123_0.75_4.3_artifact_sophis_final.csv",
+        "location_csv": "123_node_location_list.csv",
     },
 ]
 
-OUT_DIR = r"G:\svs\patch"
+OUT_DIR = r" "
 TOPK = 100                 # 每个区域（tumor/normal）分别取 TOPK 张
 WSI_LEVEL = 1
 RISKS = ["high", "low"]

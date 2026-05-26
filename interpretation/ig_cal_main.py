@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sun Nov 15 10:42:06 2020
-
-@author: taliq
-"""
 
 import argparse
 
@@ -13,8 +8,7 @@ from visualization import Subgraph_analysis_vis
 
 def Parser_main():
     parser = argparse.ArgumentParser(description="Deep cox analysis model")
-    parser.add_argument("--DatasetType", default="TCGA", help="TCGA_BRCA or BORAME or BORAME_Meta or BORAME_Prog",
-                        type=str)
+    parser.add_argument("--DatasetType", default="TCGA",type=str)
     parser.add_argument("--learning_rate", default=0.0001, help="Learning rate", type=float)
     parser.add_argument("--weight_decay", default=0.00005, help="Weight decay rate", type=float)
     parser.add_argument("--batch_size", default=6, help="batch size", type=int)
@@ -27,8 +21,8 @@ def Parser_main():
     parser.add_argument("--clip_grad_norm_value", default=2.0, help="Initial dimension for the GNN", type=float)
     parser.add_argument("--number_of_layers", default=5, help="Whole number of layer in the GNN", type=int)
     parser.add_argument("--FF_number", default=2, help="Five fold cross validation", type=int)
-    parser.add_argument("--model", default="MPGAT", help="GIN or GCN or GAT or MLP or AttMLP", type=str)
-    parser.add_argument("--gpu", default=0, help="GIN or GCN or GAT or MLP or AttMLP", type=int)
+    parser.add_argument("--model", default="graphformer", type=str)
+    parser.add_argument("--gpu", default=0, type=int)
     parser.add_argument("--norm_type", default="layer", type=str)
     parser.add_argument("--prelayernum", default=3, type=int)
     parser.add_argument("--postlayernum", default=2, type=int)
@@ -39,14 +33,14 @@ def Parser_main():
     parser.add_argument("--residual_connection", default="Y", type=str)
     parser.add_argument("--Corr_threshold", default="0.75", help="0.5 // 0.65 // 0.75", type=str)
     parser.add_argument("--load_state_dict",
-                        default=r"D:\PycharmProjects\zhongshan_hospital\Graph_neural_network\results\TCGA\MPGAT\B6C1NA\epoch-37,acc-0.820115,loss-0.994918.pt",
+                        default=r" ",
                         help="Checkpoint saved directory",type=str)
 
     return parser.parse_args()
 
 def main():
     Argument = Parser_main()
-    # Vis_main(Argument)
+    Vis_main(Argument)
     Subgraph_analysis_vis(Argument)
 
 if __name__ == "__main__":

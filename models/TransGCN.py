@@ -79,11 +79,11 @@ class Attn_Net_Gated(nn.Module):
         A = self.attention_c(A)  # N x n_classes
         return A, x
 
-class PatchGCN_module(torch.nn.Module):
+class GCN_module(torch.nn.Module):
 
     def __init__(self, hidden_dim, i, dropout_rate):
 
-        super(PatchGCN_module, self).__init__()
+        super(GCN_module, self).__init__()
         self.conv = GENConv(hidden_dim, hidden_dim, aggr='softmax',
                        t=1.0, learn_t=True, num_layers=2, norm='layer')
         self.norm = LayerNorm(hidden_dim, elementwise_affine=True)
@@ -107,10 +107,10 @@ class PatchGCN_module(torch.nn.Module):
 
         return x_after
 
-class PatchGCN(torch.nn.Module):
+class TransGCN(torch.nn.Module):
 
     def __init__(self, dropout_rate, dropedge_rate, Argument):
-        super(PatchGCN, self).__init__()
+        super(TransGCN, self).__init__()
 
         hidden_dim = Argument.initial_dim * Argument.attention_head_num
         self.num_layers = Argument.number_of_layers
@@ -120,7 +120,7 @@ class PatchGCN(torch.nn.Module):
 
         self.total_layers = torch.nn.ModuleList()
         for i in range(1, self.num_layers + 1):
-            self.total_layers.append(PatchGCN_module(hidden_dim, i, dropout))
+            self.total_layers.append(GCN_module(hidden_dim, i, dropout))
 
         self.path_phi = nn.Sequential(*[nn.Linear(hidden_dim * 6, hidden_dim * 6), nn.ReLU(), nn.Dropout(0.25)])
 

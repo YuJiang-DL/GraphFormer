@@ -9,8 +9,8 @@ from torch_geometric.nn import BatchNorm
 from torch_geometric.nn import GraphSizeNorm
 from torch_sparse import set_diag
 
-from Graph_neural_network.models.model_utils import weight_init
-from Graph_neural_network.models.model_utils import decide_loss_type
+from models.model_utils import weight_init
+from models.model_utils import decide_loss_type
 
 class BasicLinear_module(torch.nn.Module):
 
@@ -109,12 +109,10 @@ class preprocess(torch.nn.Module):
             pass
         else:
             drop_edge_attr_distance = drop_edge_attr[:, 0]
-            #drop_edge_attr_distance = drop_edge_attr_distance // 0.1
             drop_edge_attr_distance = torch.div(drop_edge_attr_distance, 0.1, rounding_mode='trunc')
             drop_edge_attr_distance = drop_edge_attr_distance.type(torch.LongTensor)
             drop_edge_attr_distance = drop_edge_attr_distance.to(input_x.device)
             drop_edge_attr_angle = drop_edge_attr[:, 1]
-            #drop_edge_attr_angle = drop_edge_attr_angle // 0.1
             drop_edge_attr_angle = torch.div(drop_edge_attr_angle, 0.1, rounding_mode='trunc')
             drop_edge_attr_angle = drop_edge_attr_angle.type(torch.LongTensor)
             drop_edge_attr_angle = drop_edge_attr_angle.to(input_x.device)

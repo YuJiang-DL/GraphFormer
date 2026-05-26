@@ -5,15 +5,14 @@ import torch.nn as nn
 
 from torch.nn import LayerNorm
 from torch_geometric.nn import global_mean_pool, BatchNorm
-from Graph_neural_network.models.Modified_GAT import GATConv as GATConv
-from Graph_neural_network.models.PatchGCN import PatchGCN_module as gcn
+from models.Modified_GAT import GATConv as GATConv
 from torch_geometric.nn import GraphSizeNorm
 
-from Graph_neural_network.models.model_utils import weight_init
-from Graph_neural_network.models.model_utils import decide_loss_type
+from models.model_utils import weight_init
+from models.model_utils import decide_loss_type
 
-from Graph_neural_network.models.pre_layer import preprocess
-from Graph_neural_network.models.post_layer import postprocess
+from models.pre_layer import preprocess
+from models.post_layer import postprocess
 
 class GAT_module(torch.nn.Module):
 
@@ -102,11 +101,6 @@ class GAT(torch.nn.Module):
         self.graph_dropout_rate = Argument.graph_dropout_rate
         self.residual = Argument.residual_connection
         self.norm_type = Argument.norm_type
-
-        #添加gcn
-        #self.gcn = gcn(Argument.initial_dim * Argument.attention_head_num,1,Argument.dropout_rate)
-        #self.gcn = GCN(Argument.initial_dim * Argument.attention_head_num)
-
         postNum = 0
         self.preprocess = preprocess(Argument)
         self.conv_list = nn.ModuleList([GAT_module(dim * self.heads_num, dim, self.heads_num, self.dropedge_rate,
@@ -139,7 +133,6 @@ class GAT(torch.nn.Module):
         self.risk_prediction_layer = nn.Sequential(
             nn.Linear(self.postprocess.postlayernum[-1], 1),
         )
-        #self.risk_prediction_layer = nn.Linear(20, 1)
 
     def reset_parameters(self):
 
@@ -164,10 +157,6 @@ class GAT(torch.nn.Module):
         count = 0
         attention_list = []
 
-        # 第一层GCN
-        # L = 1
-        # x_out_gcn1 = self.gcn(x_out, data.adj_t)
-
         for i in range(int(self.layer_num)):
             select_idx = int(i)
             x_temp_out, attention_value = \
@@ -183,64 +172,14 @@ class GAT(torch.nn.Module):
             x_concat = torch.cat((x_concat, x_glob), 1)
 
             if self.residual == "Y":
-                # if L == 1:
-                #     x_out = x_temp_out+x_out_gcn1
-                #     L = L + 1
-                # elif L == 3:
-                #     x_out_gcn2 = self.gcn(x_out, data.adj_t)
-                #     x_out = x_temp_out+x_out_gcn2
-
-                #else:
                     x_out = x_temp_out + x_out
-                    #L = L + 1
-
-
-                # gcn(x_out)
             else:
                 x_out = x_temp_out
 
             final_x = x_out
             count = count + 1
 
-        # L = 1
-        # x_out_gcn1 = self.gcn(x_out, data.adj_t)
-        #
-        # for i in range(int(self.layer_num)):
-        #     select_idx = int(i)
-        #     x_temp_out, attention_value = \
-        #         self.conv_list[select_idx](x_out, preprocess_edge_attr, data.adj_t, batch)
-        #
-        #     if self.residual == "Y":
-        #         if L == 1:
-        #             x_out = x_temp_out + x_out_gcn1
-        #             L = L + 1
-        #         elif L == 3:
-        #             x_out_gcn2 = self.gcn(x_out, data.adj_t)
-        #             x_out = x_temp_out + x_out_gcn2
-        #             L = L + 1
-        #         else:
-        #             x_out = x_temp_out + x_out
-        #
-        #     else:
-        #         x_out = x_temp_out
-        #
-        #     _, _, attention_value = attention_value.coo()
-        #     if len(attention_list) == 0:
-        #         attention_list = torch.reshape(attention_value, (1, attention_value.shape[0], attention_value.shape[1]))
-        #     else:
-        #         attention_list = torch.cat((attention_list, torch.reshape(attention_value, (
-        #             1, attention_value.shape[0], attention_value.shape[1]))), 0)
-        #
-        #     x_glob = global_mean_pool(x_temp_out, batch)  # 全局平均池化
-        #     x_concat = torch.cat((x_concat, x_glob), 1)
-        #
-        #     final_x = x_out
-        #     count = count + 1
-
-        postprocessed_output = self.postprocess(x_concat, data.batch)# preprocessed_input 200维，输出300维
-        # postprocessed_output, _ = self.lstm1(postprocessed_output)# ,(1, batch, 100)
-        # postprocessed_output = self.fc(postprocessed_output)
-        # postprocessed_output, _ = self.lstm2(postprocessed_output)#v ,(1, batch, 20)
+        postprocessed_output = self.postprocess(x_concat, data.batch)
         risk = self.risk_prediction_layer(postprocessed_output)
 
         if Interpretation_mode:

@@ -11,7 +11,6 @@ from torch_geometric.nn import GraphSizeNorm
 from torch_sparse import to_torch_sparse, SparseTensor
 from models.model_utils import weight_init
 from models.model_utils import decide_loss_type
-#from ceshi2 import MyViT
 from models.pre_layer import preprocess
 from models.post_layer import postprocess
 
@@ -128,7 +127,7 @@ class GraphFormer(torch.nn.Module):
         self.output_act = nn.Tanh()
 
         self.gcn = nn.ModuleList([gcn(Argument.initial_dim * Argument.attention_head_num, 1, Argument.dropout_rate) for _ in  range(int(Argument.number_of_layers))])
-        # self.ls1=XLSTM_Transformer(200, 100, 2,  200, output_dim=200)
+
         postNum = 0
         self.preprocess = preprocess(Argument)
         self.conv_list = nn.ModuleList([GAT_module(dim * self.heads_num, dim, self.heads_num, self.dropedge_rate,
@@ -137,11 +136,8 @@ class GraphFormer(torch.nn.Module):
                                                    simple_distance=Argument.simple_distance,
                                                    norm_type=Argument.norm_type) for _ in
                                         range(int(Argument.number_of_layers))])
-        # postNum += int(self.heads_num) * len(self.conv_list)
-        # self.l1= nn.Linear(200, 200)
         self.postprocess = postprocess(dim * self.heads_num, self.layer_num, dim * self.heads_num,
                                        (Argument.MLP_layernum - 1), dropout_rate)
-        # layer5 300, layer3 200
         self.encoder_layer0 = torch.nn.TransformerEncoderLayer(
             d_model=300,
             nhead=2,
@@ -149,14 +145,6 @@ class GraphFormer(torch.nn.Module):
             dim_feedforward=6 * 50,
         )
         self.encoder0 = torch.nn.TransformerEncoder(self.encoder_layer0, num_layers=8)
-
-        # self.decoder_layer0 = torch.nn.TransformerDecoderLayer(
-        #     d_model=300,
-        #     nhead=2,
-        #     dropout=0.1,
-        #     dim_feedforward=6 * 50,
-        # )
-        # self.decoder0 = torch.nn.TransformerDecoder(self.decoder_layer0, num_layers=8)
         self.risk_prediction_layer = nn.Sequential(
             nn.Linear(self.postprocess.postlayernum[-1], 1))
 
@@ -174,7 +162,6 @@ class GraphFormer(torch.nn.Module):
     def forward(self, data, edge_mask=None, Interpretation_mode=False):
         preprocessed_input, preprocess_edge_attr = self.preprocess(data, edge_mask)
         batch = data.batch
-        # preprocessed_input = self.ls1(preprocessed_input)
         x0_glob = global_mean_pool(preprocessed_input, batch)
 
         x_concat = x0_glob
@@ -201,28 +188,21 @@ class GraphFormer(torch.nn.Module):
             else:
                 attention_list = torch.cat((attention_list, torch.reshape(attention_value, (
                     1, attention_value.shape[0], attention_value.shape[1]))), 0)
-            #print('x_temp',x_temp_out.shape)
             if self.residual == "Y":
 
                 x_out = x_temp_out + x_out_gcn1
 
             else:
                 x_out = x_temp_out
-            # x_glob = global_mean_pool(x_temp_out, batch)
             x_glob = global_mean_pool(x_out, batch)
             x_concat = torch.cat((x_concat, x_glob), 1)
-            #print('x_glob',x_glob.shape)
 
 
             final_x = x_out
             count = count + 1
-        # print('x',x_concat.shape)
         postprocessed_output = self.postprocess(x_concat, data.batch)
-        # print(postprocessed_output.shape) #[6,300]
         postprocessed_output01 = self.encoder0(postprocessed_output)
-        # postprocessed_output = self.decoder0(postprocessed_output, postprocessed_output01)
         risk = self.risk_prediction_layer(postprocessed_output01)
-        # risk = 0.1 * self.output_act(risk)
         if Interpretation_mode:
             return risk, final_x, attention_list
         else:
