@@ -11,7 +11,7 @@ import torch
 import openslide as osd
 from torchvision import transforms
 from torch_geometric.data import Data
-from patch_construction.EfficientNet import EfficientNet
+from patch_construction.UNI import get_uni
 from graph_construction import false_graph_filtering
 from skimage.filters import threshold_multiotsu
 import pickle
@@ -40,9 +40,9 @@ class SurvivalImageDataset():
         patientID, SurvivalDuration, SurvivalCensor, Stage,
         ProgressionDuration, ProgressionCensor, MetaDuration, MetaCensor
         """
-        transform = transforms.Compose([
-                transforms.Resize(320),
-                transforms.CenterCrop(299),
+transform = transforms.Compose([
+                transforms.Resize(224),
+                transforms.CenterCrop(224),
                 transforms.ToTensor(),
                 transforms.Normalize([0.485,0.456,0.406], [0.229,0.224,0.225])
                 ])
@@ -375,10 +375,10 @@ def supernode_generation(image, model_ft, device, Argument, save_dir):
                     select_feature = select_feature.mean()
                 if len(supernode_relate_value[2]) == 0:
                     temp_select = np.array(select_feature)
-                    supernode_relate_value[2] = np.reshape(temp_select, (1,1794))
+                    supernode_relate_value[2] = np.reshape(temp_select, (1, model_ft.feature_dim + 2))
                 else:
                     temp_select = np.array(select_feature)
-                    supernode_relate_value[2] = np.concatenate((supernode_relate_value[2], np.reshape(temp_select, (1,1794))), axis=0)
+                    supernode_relate_value[2] = np.concatenate((supernode_relate_value[2], np.reshape(temp_select, (1, model_ft.feature_dim + 2))), axis=0)
                 pbar_node.update()
         coordinate_integrate = pd.DataFrame({'X':supernode_relate_value[0],'Y':supernode_relate_value[1]})
         coordinate_matrix1 = euclidean_distances(coordinate_integrate, coordinate_integrate)
@@ -429,12 +429,13 @@ def main():
     final_files.sort(key=lambda f: os.stat(f).st_size, reverse=False)
 
     device = torch.device(int(gpu) if torch.cuda.is_available() else "cpu")
-    model_ft = EfficientNet.from_pretrained('efficientnet-b4', num_classes = 2)
-    if Argument.weight_path is not None:
-        weight_path = Argument.weight_path
-        load_weight = torch.load(weight_path, map_location = device)
-        model_ft.load_state_dict(load_weight)
+    # 用 UNI 替代 EfficientNet；输入尺寸 224×224
+    model_ft = get_uni()  # 自动使用已下载的 HF 权重，或自行提供 ckpt_path
+    # 如果有本地 checkpoint，可改为: model_ft = UNI(ckpt_path="/path/to/uni_model.pth")
+    # 此处不加载额外权重，直接使用官方预训练
 
+    # UNI 的预处理：Resize 224, CenterCrop 224, 标准 ImageNet 归一化
+    # 原代码已有 transform，这里统一改为 224
     model_ft = model_ft.to(device)
     model_ft.eval()
 
